@@ -222,3 +222,47 @@ fn test_violations_are_deduped_and_sorted() {
     let messages: Vec<&str> = violations.iter().map(|v| v.message.as_str()).collect();
     assert_eq!(messages, vec!["a", "b"], "sorted and deduped");
 }
+
+#[test]
+fn test_non_string_deny_keys_are_stringified() {
+    // The v1 `{msg: true}` map form with a non-string key: a Rego object
+    // key can be any value; the key is stringified into the message.
+    let verdict = eval_single(
+        "non-string-key",
+        r#"
+        package test.non_string_key
+
+        deny contains msg if {
+            msg := {7: true}
+        }
+        "#,
+        r#"{"x": true}"#,
+    );
+    let violations = verdict
+        .violations()
+        .unwrap_or_else(|| panic!("object-keyed deny should be collected: {verdict:?}"));
+    assert_eq!(violations.len(), 1);
+    assert_eq!(violations[0].message, "7");
+}
+
+#[test]
+fn test_non_string_deny_values_fall_back_to_json_stringification() {
+    // A number produced where a message string is expected: collected via
+    // the JSON fallback.
+    let verdict = eval_single(
+        "number-msg",
+        r#"
+        package test.number_msg
+
+        deny contains msg if {
+            msg := 42
+        }
+        "#,
+        r#"{"x": true}"#,
+    );
+    let violations = verdict
+        .violations()
+        .unwrap_or_else(|| panic!("number deny should be collected: {verdict:?}"));
+    assert_eq!(violations.len(), 1);
+    assert_eq!(violations[0].message, "42");
+}

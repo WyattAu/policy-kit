@@ -76,6 +76,18 @@ fn test_good_bundle_alongside_failed_bundle_fails_closed() {
 }
 
 #[test]
+fn test_evaluating_a_failed_bundle_by_name_is_fail_closed() {
+    let mut engine = PolicyEngine::new();
+    let _ = engine.add_bundle(PolicyBundle::new("broken", BROKEN));
+
+    let verdict = engine.evaluate_bundle_str("broken", r#"{"x": true}"#);
+    assert!(
+        matches!(&verdict, PolicyVerdict::EvalError(m) if m.contains("failed to compile")),
+        "naming the failed bundle must report the compile failure: {verdict:?}"
+    );
+}
+
+#[test]
 fn test_good_bundle_still_loads_after_failure() {
     let mut engine = PolicyEngine::new();
     let _ = engine.add_bundle(PolicyBundle::new("broken", BROKEN));
@@ -91,4 +103,33 @@ fn test_engine_starts_unpoisoned_and_empty() {
     let engine = PolicyEngine::new();
     assert!(!engine.is_poisoned());
     assert_eq!(engine.bundle_names().count(), 0);
+}
+
+#[test]
+fn test_add_bundles_loads_in_order_and_names_report() {
+    let mut engine = PolicyEngine::new();
+    let loaded = engine.add_bundles([
+        PolicyBundle::new("first", GOOD),
+        PolicyBundle::new("second", GOOD),
+    ]);
+    assert!(loaded.is_ok());
+    let names: Vec<&str> = engine.bundle_names().collect();
+    assert_eq!(names, vec!["first", "second"]);
+
+    let verdict = engine.evaluate_str(r#"{"x": true}"#);
+    let violations = verdict.violations().expect("both bundles fire");
+    assert_eq!(violations.len(), 2);
+}
+
+#[test]
+fn test_add_bundles_stops_at_first_failure_and_records_it() {
+    let mut engine = PolicyEngine::new();
+    let loaded = engine.add_bundles([
+        PolicyBundle::new("broken", BROKEN),
+        PolicyBundle::new("good", GOOD),
+    ]);
+    assert!(loaded.is_err(), "the broken bundle's error propagates");
+    assert!(engine.is_poisoned());
+    // The engine is fail-closed even though "good" also loaded.
+    assert!(engine.evaluate_str(r#"{"x": true}"#).is_eval_error());
 }

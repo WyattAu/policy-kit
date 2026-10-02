@@ -1,7 +1,7 @@
 //! The policy engine — bundle loading, dialect auto-detect, and fail-closed
 //! evaluation.
 
-use regorus::value::{Array, Object, Set};
+use regorus::value::{Array, Object};
 use regorus::Value;
 
 use crate::bundle::PolicyBundle;
@@ -431,10 +431,8 @@ fn strip_null_fields(value: &Value) -> Value {
                 .collect();
             Value::Array(Array::from(stripped).into())
         }
-        Value::Set(items) => {
-            let stripped: Set = items.iter().map(strip_null_fields).collect();
-            Value::Set(stripped.into())
-        }
+        // NB: regorus `Set` values cannot appear in a JSON input document
+        // (sets are Rego-internal), so no Set arm is needed here.
         other => other.clone(),
     }
 }

@@ -170,3 +170,24 @@ fn test_raw_str_path_matches_json_path() {
         assert!(!from_str.is_compliant());
     }
 }
+
+#[cfg(feature = "json")]
+#[test]
+fn test_evaluate_all_and_evaluate_bundle_typed_paths() {
+    // The typed counterparts of evaluate_all_str / evaluate_bundle_str.
+    let engine = guardrails_engine();
+    let input: serde_json::Value = serde_json::from_str(compliant_deployment())
+        .map_err(|e| e.to_string())
+        .unwrap_or_else(|e| panic!("{e}"));
+
+    let all = engine.evaluate_all(&input);
+    let names: Vec<&str> = all.iter().map(|(n, _)| n.as_str()).collect();
+    assert_eq!(names, vec!["k8s-guardrails"]);
+    assert_eq!(all[0].1, PolicyVerdict::Compliant);
+
+    let single = engine.evaluate_bundle("k8s-guardrails", &input);
+    assert_eq!(single, PolicyVerdict::Compliant);
+
+    let unknown = engine.evaluate_bundle("missing", &input);
+    assert!(unknown.is_eval_error());
+}
