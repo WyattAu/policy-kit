@@ -1,0 +1,48 @@
+[package]
+name = "policy-kit"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.85"
+description = "Fail-closed Rego policy evaluation for Rust — bundle loading, v0/v1 dialect auto-detect, typed verdicts"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/WyattAu/policy-kit"
+keywords = ["rego", "opa", "policy", "compliance", "validation"]
+categories = ["development-tools", "config"]
+exclude = [".github/", "benches/"]
+
+[features]
+default = ["json"]
+# Typed input serialization: `PolicyEngine::evaluate` accepts a
+# `serde_json::Value` (and verdicts serialize). Without it, evaluate from
+# raw `&str` JSON via `evaluate_str` — no serde in your tree at all.
+json = ["dep:serde_json", "dep:serde"]
+
+[dependencies]
+regorus = "0.12"
+serde = { version = "1", features = ["derive"], optional = true }
+serde_json = { version = "1", optional = true }
+
+[dev-dependencies]
+criterion = "0.7"
+serde_json = "1"
+
+[[bench]]
+name = "eval_bench"
+harness = false
+
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "deny"
+
+[lints.clippy]
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+indexing_slicing = "deny"
+undocumented_unsafe_blocks = "deny"
+
+[profile.release]
+lto = "fat"
+codegen-units = 1
+strip = true
+panic = "abort"
