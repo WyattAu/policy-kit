@@ -22,6 +22,7 @@ allow = [
   "CDLA-Permissive-2.0",
   # MIT-0: `borrow-or-share` (transitive via regorus 0.12). MIT with the
   # attribution clause removed — strictly more permissive than MIT.
+  "MIT-0",
 ]
 confidence-threshold = 0.93
 
