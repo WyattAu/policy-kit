@@ -1,4 +1,5 @@
 # policy-kit
+[![Estate integration](https://github.com/WyattAu/estate-integration/actions/workflows/ci.yml/badge.svg)](https://github.com/WyattAu/estate-integration/actions/workflows/ci.yml)
 
 Fail-closed Rego policy evaluation for Rust — bundle loading, v0/v1 dialect
 auto-detect, typed verdicts. The estate's policy engine: **a policy that
