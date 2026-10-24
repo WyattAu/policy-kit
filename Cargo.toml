@@ -18,7 +18,7 @@ default = ["json"]
 json = ["dep:serde_json", "dep:serde"]
 
 [dependencies]
-regorus = "0.12"
+regorus = "0.13"
 serde = { version = "1", features = ["derive"], optional = true }
 serde_json = { version = "1", optional = true }
 
