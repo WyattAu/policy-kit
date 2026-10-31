@@ -1,7 +1,7 @@
 # policy-kit
 [![Estate integration](https://github.com/WyattAu/estate-integration/actions/workflows/ci.yml/badge.svg)](https://github.com/WyattAu/estate-integration/actions/workflows/ci.yml)
 
-Fail-closed Rego policy evaluation for Rust — bundle loading, v0/v1 dialect
+Fail-closed Rego policy evaluation for Rust; bundle loading, v0/v1 dialect
 auto-detect, typed verdicts. The estate's policy engine: **a policy that
 cannot compile or evaluate is a typed error, never a silent pass.** Built on
 Microsoft's [regorus] OPA-compatible Rego engine; semantics proven on 654
@@ -11,9 +11,9 @@ images in the Evergreen Image Registry.
 
 - **Typed verdicts**: [`PolicyVerdict`] is `Compliant`,
   `Violations(Vec<Violation>)`, or `EvalError(String)`. `EvalError` means
-  "unknown" — gate deploys on `is_compliant()`, which errors never satisfy.
+  "unknown"; gate deploys on `is_compliant()`, which errors never satisfy.
 - **Fail-closed loading**: a bundle that fails to compile returns
-  [`PolicyError::CompileFailed`] *and* poisons the engine — even if the
+  [`PolicyError::CompileFailed`] *and* poisons the engine; even if the
   error is ignored, every later evaluation fails closed.
 - **Fail-closed aggregation**: one bad rule fails the bundle; one bad
   bundle fails the whole evaluation. Partially-evaluated policy sets are
@@ -22,13 +22,13 @@ images in the Evergreen Image Registry.
   (`import rego.v1`, `deny contains msg if`) both load; the v1 partial-set
   `{msg: true}` map shape and the v0 string-array shape are both collected.
 - **Null-safe inputs**: `null` fields are stripped from the input document
-  before evaluation — in Rego, `null` is a *defined* value and would defeat
+  before evaluation; in Rego, `null` is a *defined* value and would defeat
   `not input.x` guards.
 - **Strict builtin errors**: a builtin failing at runtime (an
   RE2-incompatible regex, say) surfaces as `EvalError`, never as a skipped
   expression.
 - **Domain-agnostic**: the input is an arbitrary JSON document. policy-kit
-  never looks inside it — Dockerfile rules, deployment-manifest rules,
+  never looks inside it; Dockerfile rules, deployment-manifest rules,
   anything Rego can express. (The Dockerfile-specific rule bundles live
   with their consumer, `evergreenctl`.)
 - **`#![forbid(unsafe_code)]`, `#![deny(missing_docs)]`**, clippy
@@ -78,7 +78,7 @@ match &verdict {
 ```
 
 With the default `json` feature, `evaluate` accepts any `serde_json::Value`
-— serialize your own input types with serde. Without it, evaluate from raw
+- serialize your own input types with serde. Without it, evaluate from raw
 `&str` JSON via `evaluate_str` and no serde reaches your tree.
 
 Evaluate one bundle at a time (`evaluate_bundle_str`) or get per-bundle
@@ -93,7 +93,7 @@ verdicts in load order (`evaluate_all_str`).
 ## Performance
 
 Compile happens once per bundle at `add_bundle`; evaluation clones the
-compiled engine (order of magnitude cheaper than recompiling — see
+compiled engine (order of magnitude cheaper than recompiling; see
 `benches/eval_bench.rs`, `evaluate_cached_engine` vs
 `evaluate_fresh_compile`).
 
